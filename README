@@ -1,0 +1,47 @@
+[ What ]
+
+A small catch package to turn a go panic into 
+an os.Error, and get a nice stack trace to go. 
+
+
+[ Install ]
+
+goinstall github.com/bjarneh/try
+
+
+[ Example ]
+
+<code>
+
+
+// a type switch on errors == almost readable
+func Caller() {
+
+    e := ICanDoAnything()
+
+    switch t := e.(type) {
+    case nil:
+    case *try.Error:
+        t.Die(os.Stderr)
+    case *another.Error:
+        log.Fatalf("another: %s\n", t)
+    case *constant.Error:
+        log.Fatalf("constant: %s\n", t)
+    default:
+        log.Fatalf("os.Error %s\n", t)
+    }
+
+}
+
+
+func ICanDoAnything() (error os.Error) {
+
+    defer try.Catch(&error)
+
+    // code that does something and perhaps panics
+    // and in any case will return an os.Error
+
+    return
+}
+
+</code>
