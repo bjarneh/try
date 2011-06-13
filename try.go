@@ -13,6 +13,7 @@ import(
 
 type Error struct{
     Message string
+    Recovered interface{}
     Trace []string
 }
 
@@ -46,6 +47,6 @@ func Catch(error *os.Error) {
                 break
             }
         }
-        *error = &Error{Message: fmt.Sprintf("%v", r), Trace: s}
+        *error = &Error{Message: fmt.Sprintf("%v", r), Recovered: r, Trace: s}
     }
 }

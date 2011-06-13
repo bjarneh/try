@@ -11,34 +11,56 @@ import(
 )
 
 func TestTry(t *testing.T) {
+
     var err os.Error
     var ok bool
     var runtimeError *try.Error
 
-    err = dangarous(true)
-    runtimeError, ok = err.(*try.Error)
+    var fn []func(bool)os.Error
 
-    if !ok {
-        t.Fatalf("err != try.Error\n")
-    }else{
-        t.Logf("[error] %s\n", runtimeError)
-        for _, s := range runtimeError.Trace {
-            t.Logf("[trace] %s\n", s)
+    fn = append(fn, dangarous)
+    fn = append(fn, dangarous2)
+
+    for _, f := range fn {
+
+        err = f(true)
+
+        runtimeError, ok = err.(*try.Error)
+
+        if !ok {
+            t.Fatalf("err != try.Error\n")
+        }else{
+            t.Logf("[error] %s\n", runtimeError)
+            for _, s := range runtimeError.Trace {
+                t.Logf("[trace] %s\n", s)
+            }
+        }
+
+        err = f(false)
+
+        _, ok = err.(*try.Error)
+
+        if ok {
+            t.Fatalf("err == try.Error\n")
         }
     }
 
-    err = dangarous(false)
-    _, ok = err.(*try.Error)
-
-    if ok {
-        t.Fatalf("err == try.Error\n")
-    }
 }
 
 func dangarous(fail bool) (e os.Error) {
     defer try.Catch(&e)
-    if( fail ){
+    if fail {
         panic("I've failed you")
+    }else{
+        e = os.NewError("Plain old os.Error")
+    }
+    return
+}
+
+func dangarous2(fail bool) (e os.Error) {
+    defer try.Catch(&e)
+    if fail {
+        panic(os.NewError("panic with os.Error"))
     }else{
         e = os.NewError("Plain old os.Error")
     }
