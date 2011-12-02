@@ -4,49 +4,49 @@
 
 package try
 
-import(
-    "fmt"
-    "os"
-    "io"
-    "runtime"
+import (
+	"fmt"
+	"io"
+	"os"
+	"runtime"
 )
 
-type Error struct{
-    Message string
-    Recovered interface{}
-    Trace []string
+type Error struct {
+	Message   string
+	Recovered interface{}
+	Trace     []string
 }
 
-func (e *Error) String() string {
-    return e.Message
+func (e *Error) Error() string {
+	return e.Message
 }
 
 func (e *Error) Report(w io.Writer) {
-    fmt.Fprintf(w, "[error] %s\n", e.Message)
-    for _, t := range e.Trace {
-        fmt.Fprintf(w, "[trace] %s\n", t)
-    }
+	fmt.Fprintf(w, "[error] %s\n", e.Message)
+	for _, t := range e.Trace {
+		fmt.Fprintf(w, "[trace] %s\n", t)
+	}
 }
 
 func (e *Error) Die(w io.Writer) {
-    e.Report(w)
-    os.Exit(1)
+	e.Report(w)
+	os.Exit(1)
 }
 
 // Indicate that we are a run time error (see runtime)
 func (e *Error) RuntimeError() {}
 
-func Catch(error *os.Error) {
-    if r := recover(); r != nil {
-        s := make([]string, 0)
-        for i := 2; ; i++ {
-            _, file, line, ok := runtime.Caller(i)
-            if ok {
-                s = append(s, fmt.Sprintf("%s: %d",file,line))
-            }else{
-                break
-            }
-        }
-        *error = &Error{Message: fmt.Sprintf("%v", r), Recovered: r, Trace: s}
-    }
+func Catch(error *error) {
+	if r := recover(); r != nil {
+		s := make([]string, 0)
+		for i := 2; ; i++ {
+			_, file, line, ok := runtime.Caller(i)
+			if ok {
+				s = append(s, fmt.Sprintf("%s: %d", file, line))
+			} else {
+				break
+			}
+		}
+		*error = &Error{Message: fmt.Sprintf("%v", r), Recovered: r, Trace: s}
+	}
 }
